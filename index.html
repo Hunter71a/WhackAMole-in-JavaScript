@@ -1,0 +1,364 @@
+<!-- 
+		Name: <Carl Olson>
+		Date: <12.14.2018>
+		Class: CSCI2447, Javascript Fundamentals
+		Project: Whack a Contest
+ -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+ <title>Whack-A-Contest (CSCI2447)</title>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <!-- CSS styles: This is for me to worry about; not you. -->
+
+
+
+ <link href="css/game.css" rel="stylesheet">
+ <link rel="stylesheet" href="css/jquery-ui.min.css">
+
+
+ <script src="js/jquery-3.3.1.min.js"></script>
+ <script src="js/jquery-ui.min.js"></script>
+ <script src="js/notify.js"></script>
+
+
+
+</head>
+
+<body>
+ <div id="wrapper">
+  <div id="container">
+
+   <div id="content">
+    <div id="title">
+     <div id=moleLogo>
+      <img src="img/mole8.jpg" alt="cute mole">
+     </div>
+     <div class="text">
+
+      <h1 id="catEasterEgg" title="catEasterEgg">
+       <em>Extreme </em>Whack-A-Mole</h1>
+      <h4>New and Improved! 
+       <em> Guaranteed 20% more annoying!</em>
+      </h4>
+      <p>Increase the time and difficulty - if you DARE!</p>
+     </div>
+    </div>
+
+
+
+    <fieldset id="setDifficulty">
+     <legend>Choose your pain level</legend>
+     <label for="ten"> 10 seconds -
+      <em>"I'm scared"</em>
+     </label>
+     <input type="radio" id="ten" name="ten" value="ten" checked="checked" area-pressed="true">
+     <label for="thirty">30 seconds -
+      <em>"Ytcch! my stomach can only take so much..."</em>
+     </label>
+     <input type="radio" id="thirty" name="ten" value="thirty">
+     <label for="hundred"> 100 seconds -
+      <em>"...where angels fear to tread."</em>
+     </label>
+     <input type="radio" id="hundred" name="ten" value="hundred">
+
+    </fieldset>
+
+
+    <p>After clicking "start" time is your greatest enemy. Punish as many moles as you can. The moles appear randomly. You must remain
+     vigilent!
+    </p>
+    <div id="highScore"></div>
+
+    <div id="controls">
+     <span id="score">0 pts</span>
+     <button type="button" id="start_button" title="start_button">Start!</button>
+    </div>
+
+    <div id="timer">30 seconds left</div>
+
+    <div id="gamespace">
+     <div id="getReady"></div>
+     <div id="gameOver"></div>
+    </div>
+
+   </div>
+  </div>
+ </div>
+
+
+ <script>
+  // Global Variables
+  var score = 0;
+  var count = 5;
+  var timeRemaining = 11;
+  var difficultyIndex = 1.0;
+  var highScore = 0;
+  var mindex = 0; //create mole index to ID moles for later removal
+  var mole = new Image();   //create mole image object
+  var bam = new Image(src = "img/bam.png"); //create bam image
+  var three = new Image(src = "img/three.JPG");
+  var one = new Image(src = "img/one.JPG");
+  var grass = new Image(src = "img/grass.JPG");
+  var garden = new Image(src = "img/garden/jpg");
+  var music = new sound(src = "audio/YaketySax.mp3");
+  var squish = new sound(src = "audio/Squishy.mp3");
+  var missed = new sound(src = "audio/missed.mp3");
+  var taunt = new sound(src = "audio/taunt.mp3");
+  var whack = new sound(src = "audio/whack.mp3");
+  var boing = new sound(src = "audio/sproing.mp3");
+  var flip = new sound(src = "audio/flip.mp3");
+
+
+
+  //create sound object
+  function sound(src) {
+   this.sound = document.createElement("audio");
+   this.sound.src = src;
+   this.sound.setAttribute("preload", "auto");
+   this.sound.setAttribute("controls", "none");
+   this.sound.style.display = "none";
+   document.body.appendChild(this.sound);
+   this.play = function () {
+    this.sound.play();
+   }
+   this.stop = function () {
+    this.sound.pause();
+   }
+  }
+
+  $(document).ready(function () {
+   $('input').checkboxradio({
+    classes: {
+     "ui-checkboxradio": "highlight"
+    }
+   });  // ready radio buttons
+   $('html').css('background-image', 'url(img/garden.jpg)');
+   setLevel();
+   $('#start_button').on('click', prepareGame);
+   $('#gamespace').on('click', 'img', function () {
+    updateScore();
+    squish.play();
+    whack.play();
+    $(this).hide('explode', { pieces: 25 }, 500);
+   });  //event function for moles
+  });  // end Ready
+
+  function prepareGame() {
+   setLevel();
+   $('button').prop("disabled", true);
+   countDownTimer = setInterval(countDown, (1000 * difficultyIndex));
+  }
+
+  function startGame() {
+   $('#catEasterEgg').tooltip({
+    content: $('#contactInfo').html()
+   }); //start tooltip for EasterEgg Cat
+   music.play();
+   $('#gamespace').css('background-image', 'url(img/grass.JPG)');
+   $('#timer').show();
+   timerRef = setInterval(updateTimer, 1000);
+   addMole();
+   updateTimer();
+  } //end startGame
+
+
+
+  function countDown() {
+   count--;
+   flip.play();
+   switch (count) {
+    case 4:
+     $('#getReady').html('<img src="img/three.JPG" class="ready">');
+     break;
+    case 3:
+     $('#getReady').html('<img src="img/two.JPG" class="ready">');
+     break;
+    case 2:
+     $('#getReady').html('<img src="img/one.JPG" class="ready">');
+     break;
+    case 1:
+     $('#getReady').html('<img src="img/go.JPG" class="ready">');
+     break;
+    case 0:
+     $('#getReady').html('');
+     clearInterval(countDownTimer);
+     startGame();
+   }
+  }
+
+  function setLevel() {
+   var test1 = $('input:checked').attr('id');
+   // alert(test1);
+   if (test1 === 'ten') {
+    timeRemaining = 11;
+    difficultyIndex = 1.0;
+   }
+   if (test1 === 'thirty') {
+    timeRemaining = 31;
+    difficultyIndex = 0.75;
+   }
+   if (test1 === 'hundred') {
+    timeRemaining = 101;
+    difficultyIndex = 0.5;
+   }
+  }
+
+  function getYCoord() {
+   return Math.floor(Math.random() * 422);
+  }
+
+  function getXCoord() {
+   var value = Math.floor(Math.random() * 875);
+   return value;
+  }
+
+
+  function addMole() {
+   var y = getYCoord();
+   var x = getXCoord();
+   mindex++;
+   var moleID = "#mole" + mindex;
+   var image = new Image();
+   image = '<img id="moletokeni" src="img/mole.jpg" style="top: tokenypx; left: tokenxpx;" />';
+   image = image.replace('tokeny', y);
+   image = image.replace('tokenx', x);
+   image = image.replace('tokeni', mindex);
+   var ID = $(image).attr('id');
+   boing.play();
+   $('#gamespace').append(image);
+   removeMole(moleID);
+   var timer = Math.floor(Math.random() * (2001 * difficultyIndex));
+   var timer2 = Math.floor(Math.random() * (1001 * difficultyIndex));
+   if (timeRemaining > 2) {
+    setTimeout(addMole, timer);
+   }
+  }
+
+  function removeMole(moleID) {
+   var timer2 = Math.floor(Math.random() * (3001 * difficultyIndex));
+   setTimeout(moleRid, timer2);
+   function moleRid() {
+    $(moleID).hide(50);
+    var soundEffect = Math.floor(Math.random() * 2);
+    switch (soundEffect) {
+     case 0: taunt.play();
+      break;
+     case 1: missed.play();
+      break;
+    }
+   }
+  }
+
+  function updateTimer() {
+   var notifyOption = {
+    position: "top",
+    autoHide: true,
+    autoHideDelay: 1000
+   };
+   timeRemaining--;
+   $('#timer').html(timeRemaining + ' seconds left!');
+   switch (timeRemaining) {
+    case 90:
+     $('#timer').notify("Are you experiencing buyer's remorse yet?", notifyOption, "warn");
+     break;
+    case 22:
+     $('#timer').notify("IT'S THOSE CHUMPS AGAIN!", notifyOption, "warn");
+     break;
+    case 15:
+     $('#timer').notify("Better get WHACKING!", notifyOption, "warn");
+     break;
+    case 10:
+     $('#timer').notify("Only 10 seconds remaining!", notifyOption, "error");
+     break;
+    case 5:
+     $('#timer').notify("TIME TO PANIC!", notifyOption, "error");
+     break;
+    case 0:
+     $('#timer').notify("GAME OVER!", "error");
+     clearInterval(timerRef);
+     endGame();
+   }
+  }
+
+
+  function updateScore() {
+   score = score + 1;
+   $('#score').html(score + ' pts');
+  }
+
+  function endGame() {
+   //declare method variables
+   var title;
+   var message;
+   music.stop();
+   missed.stop();
+   taunt.stop();
+   $('#gamespace img').remove();
+   if (score >= highScore) {
+    highScore = score;
+    title = 'WINNER!'
+    message = 'New High Score! You scored ' + score + ' points';
+   }
+   else {
+    var message = 'GAME OVER!  You scored ' + score + ' points';
+    var title = 'YOU LOST!'
+   }
+   $('#highScore').html("<h3>High Score: " + highScore + " points<h3>");
+   custom_alert(message, title);
+   $('button').removeAttr("disabled");
+   $('#gamespace').css('background-color', '#FFF');
+   $('html').css('background-image', 'url(img/garden.jpg)');
+   timeRemaining = 31;
+   score = 0;
+   count = 5;
+   $('#score').html(score + ' points');
+   setLevel();
+   $('#gamespace').css('background-image', 'url(img/bgOriginal.jpg)'); 
+  }
+
+  function custom_alert(message, title) {
+   if (!title)
+    title = 'Alert';
+
+   if (!message)
+    message = 'No Message to Display.';
+
+   $('<div></div>').html(message).dialog({
+    position: {
+     my: 'center top',
+     at: 'center top',
+     of: '#gamespace'
+    },
+    title: title,
+    resizable: false,
+
+    modal: true,
+    buttons: {
+     'Ok': function () {
+      $(this).dialog('close');
+     }
+    }
+   });
+  }  // end custom alert
+
+ </script>
+
+ <script id="contactInfo" type="text/template"> 
+  <div id="catEE">
+  <p>Help!</p>
+  <p>Please call 555-555-5555</p>
+   <p>I'm being held hostage at</p> 
+   <p>1221 Maple Ave, and</p>
+   <p><em>I have run out of cat treats</em></p>
+  <p><img src="img/moose_thumbnail.jpg" alt="cat picture"></p>
+  </div>
+</script>  
+
+</body>
+
+</html>

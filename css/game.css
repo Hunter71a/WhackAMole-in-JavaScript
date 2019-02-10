@@ -1,0 +1,113 @@
+/* CSS Document */
+
+* {
+	box-sizing: border-box;
+}
+
+
+
+html {
+height: 100%;
+	width: 1140px;
+	margin: 0 auto;
+	font-family: sans-serif;
+	font-size: 13px;
+	color: #333;
+	background-color: black; 
+background-position: center;
+background-size: cover; 
+background-repeat: no-repeat;
+}
+
+#title {
+
+	display: inline-block;
+}
+ .text{
+		float: left;
+	}
+
+	#highScore{
+		text-indent: 1.5em;
+	}
+
+	#moleLogo {
+		display: inline-block;
+		float: right;
+		width: 5vw;
+		margin-left: 600px;
+	}
+
+#wrapper {
+		/* The image used */
+		position: absolute;
+
+
+  /* Full height */
+  height: 100%; 
+
+  /* Center and scale the image nicely */
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+}
+
+#container {
+	border-radius: 5px 5px 50px 50px; 
+ background-image: linear-gradient(to bottom right, yellow, green, yellow);
+	padding: 5px 15px 15px 5px;
+	width: 1140px;
+
+}	
+	
+h1 {
+	margin: 2px;}
+	
+button {
+	font-size: 12px;
+	font-weight: bold;
+	padding: 8px; }
+
+#getReady{
+			position: relative;
+			display: block;
+  margin-left: auto;
+		margin-right: auto;
+		margin-top: 15%;
+		width: 30%;
+
+}
+	
+div#content {
+	padding: 20px;
+	background-image: linear-gradient(to bottom right, rgb(215, 233, 199), #EEE, rgb(220, 236, 181));
+border-radius: 5px 5px 35px 35px; 
+}
+	
+div#controls {
+	text-align: right; }
+	
+div#controls span {
+	font-weight: bold;
+	color: #990000; }
+	
+div#controls button {
+	margin-left: 20px; }
+	
+div#timer {
+	display: none;
+	font-weight: bold; 
+	margin-left: 20px; 
+	color: #336699; }
+	
+div#gamespace {
+	position: relative;
+	margin: 20px;
+	padding: 10px;
+	height: 490px;
+	background-color: #FFF;
+	border: 2px solid #CCC; }
+
+	div#gamespace img { 
+		position: absolute;	 }
